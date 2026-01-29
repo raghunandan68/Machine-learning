@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -10,7 +11,7 @@ st.title("Naive Bayes Classifier - Iris Dataset")
 iris = load_iris()
 X = iris.data
 Y = iris.target
-
+st.write(pd.DataFrame(X,columns=iris.feature_names).head())
 st.sidebar.header("Model Selection")
 model_choice = st.sidebar.selectbox(
     "Choose Naive Bayes Model",
@@ -27,21 +28,21 @@ if model_choice == "Gaussian Naive Bayes":
     model = GaussianNB()
 else:
     model = BernoulliNB()
+if st.button("Train Model"):
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_test)
 
-model.fit(x_train, y_train)
-y_pred = model.predict(x_test)
+    accuracy = accuracy_score(y_test, y_pred)
 
-accuracy = accuracy_score(y_test, y_pred)
+    st.subheader(" Model Performance")
+    st.write(f"**Accuracy Score:** {accuracy:.2f}")
 
-st.subheader(" Model Performance")
-st.write(f"**Accuracy Score:** {accuracy:.2f}")
+    st.subheader("Confusion Matrix")
+    cm = confusion_matrix(y_test, y_pred)
+    fig, ax = plt.subplots()
+    disp = ConfusionMatrixDisplay(cm, display_labels=iris.target_names)
+    disp.plot(ax=ax)
+    st.pyplot(fig)
 
-st.subheader("Confusion Matrix")
-cm = confusion_matrix(y_test, y_pred)
-fig, ax = plt.subplots()
-disp = ConfusionMatrixDisplay(cm, display_labels=iris.target_names)
-disp.plot(ax=ax)
-st.pyplot(fig)
-
-st.subheader("Classification Report")
-st.text(classification_report(y_test, y_pred, target_names=iris.target_names))
+    st.subheader("Classification Report")
+    st.text(classification_report(y_test, y_pred, target_names=iris.target_names))
